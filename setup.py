@@ -14,6 +14,7 @@ import os
 setup(
     name = "pyRpc",
     version = "0.1",
+    url = 'https://github.com/justinfx/pyRpc',
     packages = find_packages(),
     include_package_data = True,
     install_requires = ['pyzmq'],
