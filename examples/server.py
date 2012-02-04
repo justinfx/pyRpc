@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
 import sys, time
-from PyQt4 import QtCore
-
 import pyRpc
 
 def main():
     
-    app = QtCore.QCoreApplication(sys.argv)
     server = pyRpc.PyRpc("Server", tcpaddr="127.0.0.1:40000")
+
+    time.sleep(.1)
+
     server.publishService(myFunction)
     server.publishService(noReturn)
     server.start()
@@ -23,7 +23,9 @@ def main():
 
 def myFunction(*args, **kwargs):
     "This does something and returns values"
+    print "myFunction() called! Doing some stuff."
     time.sleep(2)
+    print "Done!"
     return args, kwargs
 
 def noReturn(value=1):
