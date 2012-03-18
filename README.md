@@ -24,15 +24,13 @@ http://qt.nokia.com/downloads
 ### Install
 
 Download and:
->>> python setup.py install
+<code>>>> python setup.py install</code>
 
 or 
-
->>> pip install pyRpc
+<code>>>> pip install pyRpc</code>
 
 or
-
->>> easy_install pyRpc
+<code>>>> easy_install pyRpc</code>
 
 
 ### Basic Example
