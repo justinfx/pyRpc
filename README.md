@@ -37,8 +37,7 @@ or
 
 #### Exporting functions as services (server)
 
-<pre><code class="python">
-
+```python
 import time
 from pyRpc import PyRpc
 
@@ -64,12 +63,11 @@ try:
 except KeyboardInterrupt:
     myRpc.stop()
 
-</code></pre>
+```
 
 #### Calling remote services from a client
 
-<pre><code class="python">
-
+```python
 import time
 from pyRpc import RpcConnection
 
@@ -98,5 +96,5 @@ remote.close()
 
 time.sleep(1)
 
-</code></pre>
+```
 
