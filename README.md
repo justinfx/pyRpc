@@ -17,7 +17,7 @@ This module uses ZeroMQ for the messaging functionality: http://www.zeromq.org/
 It should get installed by the setup.py installation process. But on some
 systems you may need to install this seperately.
 
-The examples all require PyQt4:
+The GUI-based examples require PyQt4:
 http://www.riverbankcomputing.co.uk/software/pyqt/download
 http://qt.nokia.com/downloads
 
