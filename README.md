@@ -78,12 +78,13 @@ def response(resp):
 remote = RpcConnection("com.myCompany.MyApplication")
 time.sleep(.1)
 
+# we can ask the remote server what services are available
 resp = remote.availableServices()
 for service in resp.result:
 	print "\nService: %(service)s \nDescription: %(doc)s \nUsage: %(format)s\n" % service
 
 
-# calls remove add() and does not wait. Result will be returned to response()
+# calls remote add() and does not wait. Result will be returned to response()
 remote.call("add", args=(1, 2), callback=response)
 
 # blocks while waiting for a response
