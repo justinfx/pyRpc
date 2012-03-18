@@ -11,7 +11,11 @@ from pyRpc import RpcConnection
 
 if __name__ == "__main__":
 
-	remote = RpcConnection("Server", tcpaddr="127.0.0.1:40000")
+	remote = RpcConnection("Server")
+
+	# if the server were using a TCP connection:
+	# remote = RpcConnection("Server", tcpaddr="127.0.0.1:40000")
+
 	time.sleep(.1)
 
 	print "Calling myFunction()"

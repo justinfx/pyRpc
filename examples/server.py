@@ -5,7 +5,12 @@ import pyRpc
 
 def main():
     
-    server = pyRpc.PyRpc("Server", tcpaddr="127.0.0.1:40000")
+    # using local IPC communication    
+    server = pyRpc.PyRpc("Server")
+
+    # Could have used a TCP connection if we wanted:
+    # server = pyRpc.PyRpc("Server", tcpaddr="127.0.0.1:40000")
+
 
     time.sleep(.1)
 

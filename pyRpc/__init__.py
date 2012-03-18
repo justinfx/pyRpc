@@ -90,7 +90,8 @@ class PyRpc(Thread):
         Create a new RPC object that can export services to clients.
 
         str name    - the name of this Application
-        str tcpaddr - if not None, should be a ip:port address (127.0.0.1:8000)
+        str tcpaddr - if None, use a local IPC connection. 
+                        Otherwise this should be a ip:port address (127.0.0.1:8000)
 
         context     - Optionally pass in another pyzmq Context
         """
