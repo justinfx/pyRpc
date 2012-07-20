@@ -49,6 +49,7 @@ import inspect
 import logging
 
 from threading import Thread, current_thread
+from uuid import uuid4 
 
 import zmq
 
@@ -372,8 +373,6 @@ class RpcRequest(object):
     calls.
     """
     
-    REQ_COUNT = 0
-    
     def __init__(self):
         self._method = ""
         self._args   = []
@@ -381,8 +380,7 @@ class RpcRequest(object):
         self._callback = False
         self._async = False
         
-        self._callback_id = self.REQ_COUNT
-        self.REQ_COUNT += 1
+        self._callback_id = uuid4().int
         
     
     def __repr__(self):
