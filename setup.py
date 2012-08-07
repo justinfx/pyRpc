@@ -10,10 +10,11 @@ except ImportError:
     
 import os
 
+from pyRpc import __version__
 
 setup(
     name = "pyRpc",
-    version = "0.1.1",
+    version = __version__,
     url = 'https://github.com/justinfx/pyRpc',
     packages = find_packages(),
     include_package_data = True,
