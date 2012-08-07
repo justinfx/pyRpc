@@ -52,11 +52,12 @@ from threading import Thread, current_thread
 from uuid import uuid4 
 
 import zmq
+from zmq import ZMQError
+
 
 logger = logging.getLogger(__name__)
 
 _TEMPDIR = tempfile.gettempdir()
-_CONTEXT = zmq.Context()
 
 
 ############################################################# 
@@ -84,7 +85,7 @@ class PyRpc(Thread):
     """
     
     
-    def __init__(self, name, tcpaddr=None, context=None):
+    def __init__(self, name, tcpaddr=None, context=None, workers=1):
         """
         __init__(str name, str tcpaddr=None, Context content=None)
 
@@ -95,11 +96,17 @@ class PyRpc(Thread):
                         Otherwise this should be a ip:port address (127.0.0.1:8000)
 
         context     - Optionally pass in another pyzmq Context
+        int workers - Specify the number of worker threads to start, for 
+                        processing incoming requests. Default is to only start 
+                        a single worker.
+
+        Please note that the Context will be closed when the server is stopped. 
         """
 
         super(PyRpc, self).__init__()
         
-        self._context = context or _CONTEXT
+        self._context = context or zmq.Context.instance()
+
         if tcpaddr:
             self._address = "tcp://%s" % tcpaddr
         else:
@@ -108,44 +115,36 @@ class PyRpc(Thread):
         self.exit_request = False
         
         self._services = {}
+        self._worker_url = "inproc://workers"
 
-    def run(self):
-        """ Not to be called directly. Use start() """
+        self._num_threads = max(int(workers), 1)
 
-        logger.debug("Starting RPC thread loop")
-        
-        receiver = self._context.socket(zmq.REP)
-        receiver.bind(self._address)
-        logger.debug("Listening @ %s" % self._address)
-        
-        poller = zmq.Poller()
-        poller.register(receiver, zmq.POLLIN)
-        
-        while True:
-            
-            if self.exit_request:
-                logger.debug("Exiting RPC thread loop")
-                return
-            
-            socks = dict(poller.poll(500))
-            
-            if socks.get(receiver, None) == zmq.POLLIN:
+        self.receiver = self.dealer = None
 
-                req = receiver.recv_pyobj()
-                logger.debug("request received: %s" % req)
+
+    def _worker_routine(self):
+        socket = self._context.socket(zmq.REP)
+        socket.connect(self._worker_url)
+
+        while not self.exit_request:
+
+            try:
+
+                req = socket.recv_pyobj()
+                logger.debug("request received by thread %s: %s" % (current_thread().name, req))
 
                 resp = RpcResponse()
-                
+        
                 if req.method == "__services__":
                     service = {'method' : self._serviceListReq}
                 else:
                     service = self.services.get(req.method, None)
-                    
+
                 if not service:
                     resp.result = None
                     resp.status = -1
                     resp.error = "Non-existant service: %s" % req.method
-                
+
                 else:
                     try:
                         resp.result = service['method'](*req.args, **req.kwargs)
@@ -154,10 +153,50 @@ class PyRpc(Thread):
                         resp.status = 1
                         resp.result = None
                         resp.error = str(e)
- 
-                receiver.send_pyobj(resp)
+
+                socket.send_pyobj(resp)
                 logger.debug("sent response: %s" % resp)
-    
+            
+            except ZMQError, e:
+                if e.errno == zmq.ETERM and self.exit_request:
+                    break
+                else:
+                    socket.close()
+                    raise
+
+        socket.close()
+        logger.debug("Worker thread %s exiting" % current_thread().name)
+
+
+    def run(self):
+        """ Not to be called directly. Use start() """
+
+        logger.debug("Starting RPC thread loop w/ %d worker(s)" % self._num_threads)
+       
+        self.receiver = self._context.socket(zmq.ROUTER)
+        self.receiver.bind(self._address)
+        logger.debug("Listening @ %s" % self._address)
+
+        self.dealer = self._context.socket(zmq.DEALER)
+        self.dealer.bind(self._worker_url)
+
+        for i in xrange(self._num_threads):
+            thread = Thread(target=self._worker_routine, name="RPC-Worker-%d" % (i+1))
+            thread.daemon=True
+            thread.start()
+
+        try:
+            # blocking
+            ret = zmq.device(zmq.QUEUE, self.receiver, self.dealer)
+
+        except ZMQError, e:
+            # stop() generates a valid ETERM, otherwise its unexpected
+            if not (e.errno == zmq.ETERM and self.exit_request):
+                raise
+        finally:
+            self.receiver.close()
+            self.dealer.close()
+
      
     def start(self):
         """
@@ -165,7 +204,11 @@ class PyRpc(Thread):
 
         Start the RPC server.
         """
+        if self.receiver is not None:
+            raise RuntimeError("Cannot start RPC Server more than once.")
+
         super(PyRpc, self).start()  
+
         
     def stop(self):
         """ 
@@ -176,7 +219,13 @@ class PyRpc(Thread):
         logger.debug("Stop request made for RPC thread loop")
         self.exit_request = True
 
-    
+        if self.receiver:
+            self.receiver.close()
+        if self.dealer:
+            self.dealer.close()
+
+        self._context.term()
+
     def publishService(self, method):
         """
         publishService (object method)
