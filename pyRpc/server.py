@@ -142,7 +142,7 @@ class PyRpc(Thread):
                     try:
                         resp.result = service['method'](*req.args, **req.kwargs)
                         resp.status = 0
-                    except Exception, e:
+                    except Exception as e:
                         resp.status = 1
                         resp.result = None
                         resp.error = str(e)
@@ -150,7 +150,7 @@ class PyRpc(Thread):
                 socket.send_pyobj(resp)
                 logger.debug("sent response: %s" % resp)
             
-            except ZMQError, e:
+            except ZMQError as e:
                 if e.errno == zmq.ETERM and self.exit_request:
                     break
                 else:
@@ -173,7 +173,7 @@ class PyRpc(Thread):
         self.dealer = self._context.socket(zmq.DEALER)
         self.dealer.bind(self._worker_url)
 
-        for i in xrange(self._num_threads):
+        for i in range(self._num_threads):
             thread = Thread(target=self._worker_routine, name="RPC-Worker-%d" % (i+1))
             thread.daemon=True
             thread.start()
@@ -182,7 +182,7 @@ class PyRpc(Thread):
             # blocking
             ret = zmq.device(zmq.QUEUE, self.receiver, self.dealer)
 
-        except ZMQError, e:
+        except ZMQError as e:
             # stop() generates a valid ETERM, otherwise its unexpected
             if not (e.errno == zmq.ETERM and self.exit_request):
                 raise
@@ -190,7 +190,6 @@ class PyRpc(Thread):
             self.receiver.close()
             self.dealer.close()
 
-     
     def start(self):
         """
         start()
@@ -202,7 +201,6 @@ class PyRpc(Thread):
 
         super(PyRpc, self).start()  
 
-        
     def stop(self):
         """ 
         stop()
@@ -238,7 +236,7 @@ class PyRpc(Thread):
     
     def _serviceListReq(self):
         services = []
-        for name, v in self.services.iteritems():
+        for name, v in self.services.items():
             services.append({'service' : name, 'format' : v['format'], 'doc' : v['doc']})
         return services
     
@@ -298,6 +296,3 @@ class RpcResponse(object):
     @error.setter
     def error(self, v):
         self._error = v
-        
-
-

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import sys, time
-from functools import partial
-
+import sys
 from PyQt4 import QtCore, QtGui
 
 from pyRpc import RpcConnection, RpcResponse
@@ -26,7 +24,7 @@ class Window(QtGui.QMainWindow):
         layout.addWidget(self.textEdit)
        
         self.setCentralWidget(widget)
-        self.resize(640,480)
+        self.resize(640, 480)
         self.setWindowTitle("Client Application")
     
         self._remote = RpcConnection("Server", tcpaddr="127.0.0.1:40000")

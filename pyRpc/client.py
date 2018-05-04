@@ -96,17 +96,15 @@ class RpcConnection(object):
         self.exit_request = False
         self._callbacks = {}
         
-        for i in xrange(max(int(workers), 1)):
+        for i in range(max(int(workers), 1)):
             t = Thread(target=self._worker_routine, 
                         args=(self._context, self._address, self._work_address))
             t.daemon = True
             t.start()
-
     
     def __del__(self):
         logger.debug("closing connection")
         self.close()
-
 
     def close(self):
         """
@@ -115,8 +113,7 @@ class RpcConnection(object):
         Close the client connection
         """
         self.exit_request = True
-        
-                
+
     def availableServices(self):
         """
         availableServices() -> RpcResponse
@@ -127,7 +124,6 @@ class RpcConnection(object):
         """
         return self.call("__services__")
 
-            
     def call(self, method, callback=None, async=False, args=[], kwargs={}):
         """
         call(str method, object callback=None, bool async=False, list args=[], dict kwargs={})
@@ -158,7 +154,7 @@ class RpcConnection(object):
 
         if async or callback:
             # push the request down to the workers
-            self._async_sender.send_pyobj(req)
+            self._async_sender.send_pyobj(req, protocol=2)
             return RpcResponse(None, 0, None)
 
         # otherwise, we are running this as a blocking call
@@ -167,14 +163,13 @@ class RpcConnection(object):
             self._main_sender = self._context.socket(zmq.REQ)
             self._main_sender.connect(self._address)  
                       
-        self._main_sender.send_pyobj(req)
+        self._main_sender.send_pyobj(req, protocol=2)
         resp = self._main_sender.recv_pyobj()
         
         logger.debug("Got reply to method %s: %s" % (method, resp))
         
         return resp
- 
-    
+
     def _worker_routine(self, context, remote_address, work_address):
         """
         Worker loop for processing rpc calls.
@@ -187,7 +182,6 @@ class RpcConnection(object):
         logger.debug("Making connection to RPC server at: %s" % remote_address)
         remote = context.socket(zmq.REQ)
         remote.connect(remote_address)
-
 
         poller = zmq.Poller()
         poller.register(receiver, zmq.POLLIN)
@@ -207,8 +201,6 @@ class RpcConnection(object):
                 if cbk:
                     logger.debug("Response received from server. Running callback.")
                     cbk(resp)
-
-
 
     
 ############################################################# 
@@ -233,7 +225,6 @@ class RpcRequest(object):
         self._async = False
         
         self._callback_id = uuid4().int
-        
     
     def __repr__(self):
         return "<%s: %s (#args:%d, #kwargs:%d)>" % (self.__class__.__name__, 
@@ -250,8 +241,7 @@ class RpcRequest(object):
         if not isinstance(m, bool):
             raise TypeError("async value must be True or False")
         self._async = m
-    
-       
+
     @property
     def method(self):
         return self._method

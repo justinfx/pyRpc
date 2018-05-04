@@ -1,1 +1,7 @@
 pyRpc.egg-info
+.idea/
+env/
+**.pyc
+**.swp
+build/
+dist/
