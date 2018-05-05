@@ -45,6 +45,8 @@ POSSIBILITY OF SUCH DAMAGE.
 from pyRpc.server import PyRpc, RpcResponse
 from pyRpc.client import RpcConnection, RpcRequest 
 
+from _version import __version__
+
 __all__ = ['server', 'client', 'PyRpc', 'RpcResponse', 'RpcConnection', 'RpcRequest']
 
 

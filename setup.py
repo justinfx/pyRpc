@@ -8,11 +8,12 @@ except ImportError:
     ez_setup.use_setuptools()
     from setuptools import setup, find_packages
     
-import os
+ctx = {}
+execfile('pyRpc/_version.py', {}, ctx)
 
 setup(
     name = "pyRpc",
-    version = "0.2",
+    version = ctx['__version__'],
     url = 'https://github.com/justinfx/pyRpc',
     packages = find_packages(),
     include_package_data = True,
@@ -27,6 +28,8 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
         'Topic :: Communications',
     ]
 )
