@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from sys import version_info
 
 try:
     from setuptools import setup, find_packages
@@ -7,9 +8,13 @@ except ImportError:
     import ez_setup
     ez_setup.use_setuptools()
     from setuptools import setup, find_packages
-    
+
 ctx = {}
-execfile('pyRpc/_version.py', {}, ctx)
+
+if version_info[0] < 3:
+    execfile('pyRpc/_version.py', {}, ctx)
+else:
+    exec(compile(open('pyRpc/_version.py', "rb").read(), 'pyRpc/_version.py', 'exec'), {}, ctx)
 
 setup(
     name = "pyRpc",
