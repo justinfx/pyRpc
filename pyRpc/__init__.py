@@ -41,11 +41,11 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE. 
 
 """
-
+from __future__ import absolute_import
 from pyRpc.server import PyRpc, RpcResponse
 from pyRpc.client import RpcConnection, RpcRequest 
 
-from _version import __version__
+from ._version import __version__
 
 __all__ = ['server', 'client', 'PyRpc', 'RpcResponse', 'RpcConnection', 'RpcRequest']
 

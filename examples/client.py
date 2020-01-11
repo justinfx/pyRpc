@@ -28,7 +28,7 @@ if __name__ == "__main__":
 	print("Calling slow()")
 
 	for i in range(5):
-		remote.call("slow", async=True, callback=callback)
+		remote.call("slow", is_async=True, callback=callback)
 
 	print("Calling fast()")
 	resp = remote.call("fast")

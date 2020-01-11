@@ -54,7 +54,7 @@ class Window(QtGui.QMainWindow):
         self._remote.call("noReturn", callback=self.remoteCallFinished.emit)
  
         self.textEdit.appendPlainText("\nSending an async remote call to noReturn()...")
-        self._remote.call("noReturn", callback=self.remoteCallFinished.emit, async=True)
+        self._remote.call("noReturn", callback=self.remoteCallFinished.emit, is_async=True)
 
                                 
 if __name__ == "__main__":

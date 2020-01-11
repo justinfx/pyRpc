@@ -41,6 +41,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE. 
 
 """
+from __future__ import absolute_import
 
 from threading import Thread, current_thread
 import logging
@@ -180,11 +181,11 @@ class PyRpc(Thread):
 
         try:
             # blocking
-            ret = zmq.device(zmq.QUEUE, self.receiver, self.dealer)
+            zmq.device(zmq.QUEUE, self.receiver, self.dealer)
 
-        except ZMQError as e:
+        except ZMQError:
             # stop() generates a valid ETERM, otherwise its unexpected
-            if not (e.errno == zmq.ETERM and self.exit_request):
+            if not self.exit_request:
                 raise
         finally:
             self.receiver.close()
