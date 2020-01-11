@@ -7,7 +7,6 @@ When using the client.py and server.py examples, it is important to
 start the server.py first, and then start the client.py as it will
 begin to communicate right away.
 
-The clientGui and serverGui examples require PyQt4 to be installed:
-http://www.riverbankcomputing.co.uk/software/pyqt/download
-http://qt.nokia.com/downloads
+The clientGui and serverGui examples require PySide2 to be installed:
+https://pypi.org/project/PySide2/
 

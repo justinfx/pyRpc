@@ -1,22 +1,22 @@
 #!/usr/bin/env python
 
 import sys, time
-from PyQt4 import QtCore, QtGui
+from PySide2 import QtCore, QtWidgets
 
 from pyRpc import PyRpc
 
 
-class Window(QtGui.QMainWindow):
+class Window(QtWidgets.QMainWindow):
     
-    feedbackReady = QtCore.pyqtSignal(str)
+    feedbackReady = QtCore.Signal(str)
     
     def __init__(self):
         super(Window, self).__init__()
 
-        widget = QtGui.QWidget(self)
-        layout = QtGui.QVBoxLayout(widget)
+        widget = QtWidgets.QWidget(self)
+        layout = QtWidgets.QVBoxLayout(widget)
         
-        self.textEdit = QtGui.QPlainTextEdit("Waiting on remote commands...", widget)
+        self.textEdit = QtWidgets.QPlainTextEdit("Waiting on remote commands...", widget)
         self.textEdit.setReadOnly(True)
         layout.addWidget(self.textEdit)
        
@@ -51,7 +51,7 @@ class Window(QtGui.QMainWindow):
         time.sleep(2)
 
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def _handleFeedback(self, val):
         self.textEdit.appendPlainText(val)
         
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     logger.addHandler(ch)
     
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     win = Window()
     win.show()
     app.exec_()  

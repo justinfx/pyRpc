@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 
 import sys
-from PyQt4 import QtCore, QtGui
+from PySide2 import QtCore, QtWidgets
 
 from pyRpc import RpcConnection, RpcResponse
 
 
-class Window(QtGui.QMainWindow):
+class Window(QtWidgets.QMainWindow):
     
-    remoteCallFinished = QtCore.pyqtSignal(RpcResponse)
+    remoteCallFinished = QtCore.Signal(RpcResponse)
     
     def __init__(self):
         super(Window, self).__init__()
 
-        widget = QtGui.QWidget(self)
-        layout = QtGui.QVBoxLayout(widget)
+        widget = QtWidgets.QWidget(self)
+        layout = QtWidgets.QVBoxLayout(widget)
         
-        self.button = QtGui.QPushButton("Send command", widget)
+        self.button = QtWidgets.QPushButton("Send command", widget)
         layout.addWidget(self.button)
         
-        self.textEdit = QtGui.QPlainTextEdit("Ready to send remote command...", widget) 
+        self.textEdit = QtWidgets.QPlainTextEdit("Ready to send remote command...", widget)
         self.textEdit.setReadOnly(True)
         layout.addWidget(self.textEdit)
        
@@ -33,7 +33,7 @@ class Window(QtGui.QMainWindow):
         self.button.clicked.connect(self.sendRequest)
 
         
-    @QtCore.pyqtSlot(RpcResponse)
+    @QtCore.Slot(RpcResponse)
     def handleResponse(self, resp):
         self.textEdit.appendPlainText("""
         Received reply from remote application: 
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     logger.addHandler(ch)
 
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     win = Window()
     win.show()
     app.exec_()    
