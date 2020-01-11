@@ -1,4 +1,3 @@
-
 """
 pyRpc - __init__.py
 
@@ -43,12 +42,8 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 from __future__ import absolute_import
 from pyRpc.server import PyRpc, RpcResponse
-from pyRpc.client import RpcConnection, RpcRequest 
+from pyRpc.client import RpcConnection, RpcRequest
 
 from ._version import __version__
 
 __all__ = ['server', 'client', 'PyRpc', 'RpcResponse', 'RpcConnection', 'RpcRequest']
-
-
-
-

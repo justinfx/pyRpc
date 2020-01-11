@@ -5,13 +5,11 @@ import logging
 
 import pyRpc
 
-
 logging.basicConfig(level=logging.DEBUG)
 
 
 def main():
-    
-    # using local IPC communication    
+    # using local IPC communication
     server = pyRpc.PyRpc("Server", workers=2)
 
     # Could have used a TCP connection if we wanted:
@@ -29,13 +27,15 @@ def main():
             time.sleep(.5)
     except KeyboardInterrupt:
         server.stop()
-    
+
+
 counter = 0
+
 
 def slow(*args, **kwargs):
     "This does something and returns values"
 
-    global counter 
+    global counter
 
     print("slow() called! Doing some stuff.")
     time.sleep(3)
@@ -43,14 +43,16 @@ def slow(*args, **kwargs):
     counter += 1
     return counter
 
+
 def fast(*args, **kwargs):
     "This does something and returns values"
 
-    global counter 
+    global counter
 
     print("fast() called! Doing some stuff.")
     counter += 1
     return counter
+
 
 def noReturn(value=1):
     "This does something and returns nothing"

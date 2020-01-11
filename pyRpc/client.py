@@ -1,4 +1,3 @@
-
 """
 pyRpc - client.py 
 
@@ -44,18 +43,18 @@ POSSIBILITY OF SUCH DAMAGE.
 from __future__ import absolute_import
 
 import logging
-from uuid import uuid4 
+from uuid import uuid4
 from threading import Thread, current_thread
 
 import zmq
 from zmq import ZMQError
 
 from pyRpc.constants import TEMPDIR
-from pyRpc.server import RpcResponse 
+from pyRpc.server import RpcResponse
 
 logger = logging.getLogger(__name__)
 
-            
+
 ############################################################# 
 #############################################################
 ######## RpcConnection
@@ -76,33 +75,33 @@ class RpcConnection(object):
     
         rpc = PyRpc.RpcConnection("com.myCompany.MyApplication")  # any useful name
         rpc.call("myFunction", callback=processResponse, args=(1, "a"), kwargs={'flag':True, 'option':"blarg"})
-    """    
-    
+    """
+
     def __init__(self, name, tcpaddr=None, context=None, workers=1):
-        
+
         self._context = context or zmq.Context.instance()
 
         if tcpaddr:
             self._address = "tcp://%s" % tcpaddr
         else:
             self._address = "ipc://%s/%s.ipc" % (TEMPDIR, name)
-        
+
         self._work_address = "inproc://workRequest"
 
         self._async_sender = self._context.socket(zmq.PUSH)
-        self._async_sender.bind(self._work_address)   
+        self._async_sender.bind(self._work_address)
 
-        self._main_sender = None 
+        self._main_sender = None
 
         self.exit_request = False
         self._callbacks = {}
-        
+
         for i in range(max(int(workers), 1)):
-            t = Thread(target=self._worker_routine, 
-                        args=(self._context, self._address, self._work_address))
+            t = Thread(target=self._worker_routine,
+                       args=(self._context, self._address, self._work_address))
             t.daemon = True
             t.start()
-    
+
     def __del__(self):
         logger.debug("closing connection")
         self.close()
@@ -146,14 +145,14 @@ class RpcConnection(object):
         req.kwargs = kwargs
         # backwards compatible with previous 'async' arg
         req.is_async = kwargs.get('async', is_async)
-        
+
         if req.is_async or callback:
             if callback:
                 req.callback = True
                 self._callbacks[req.id] = callback
             else:
                 logger.debug("Setting request to async, with no callback")
- 
+
         logger.debug("Sending a RPC call to method: %s" % method)
 
         if req.is_async or callback:
@@ -165,13 +164,13 @@ class RpcConnection(object):
         if self._main_sender is None:
             logger.debug("Making connection to RPC server at: %s" % self._address)
             self._main_sender = self._context.socket(zmq.REQ)
-            self._main_sender.connect(self._address)  
-                      
+            self._main_sender.connect(self._address)
+
         self._main_sender.send_pyobj(req, protocol=2)
         resp = self._main_sender.recv_pyobj()
-        
+
         logger.debug("Got reply to method %s: %s" % (method, resp))
-        
+
         return resp
 
     def _worker_routine(self, context, remote_address, work_address):
@@ -179,7 +178,7 @@ class RpcConnection(object):
         Worker loop for processing rpc calls.
         """
         logger.debug("Starting local worker thread: %s" % current_thread().name)
-        
+
         receiver = context.socket(zmq.PULL)
         receiver.connect(work_address)
 
@@ -189,24 +188,24 @@ class RpcConnection(object):
 
         poller = zmq.Poller()
         poller.register(receiver, zmq.POLLIN)
-                                
+
         while not self.exit_request:
-            
+
             socks = dict(poller.poll(500))
-            if socks.get(receiver, None) == zmq.POLLIN:            
+            if socks.get(receiver, None) == zmq.POLLIN:
                 msg = receiver.recv_pyobj()
-    
+
                 cbk = self._callbacks.pop(msg.id, None)
-        
+
                 logger.debug("(%s) Forwarding a RPC call to method: %s" % (current_thread().name, msg.method))
-                remote.send_pyobj(msg)  
+                remote.send_pyobj(msg)
                 resp = remote.recv_pyobj()
-                              
+
                 if cbk:
                     logger.debug("Response received from server. Running callback.")
                     cbk(resp)
 
-    
+
 ############################################################# 
 #############################################################
 ######## RpcRequest
@@ -220,26 +219,26 @@ class RpcRequest(object):
     with published services. Used by RpcConnection when doing
     calls.
     """
-    
+
     def __init__(self):
         self._method = ""
-        self._args   = []
+        self._args = []
         self._kwargs = {}
         self._callback = False
         self._async = False
-        
+
         self._callback_id = uuid4().int
-    
+
     def __repr__(self):
-        return "<%s: %s (#args:%d, #kwargs:%d)>" % (self.__class__.__name__, 
-                                                      self.method, 
-                                                      len(self.args), 
-                                                      len(self.kwargs))
- 
+        return "<%s: %s (#args:%d, #kwargs:%d)>" % (self.__class__.__name__,
+                                                    self.method,
+                                                    len(self.args),
+                                                    len(self.kwargs))
+
     @property
     def is_async(self):
         return self._async
-    
+
     @is_async.setter
     def is_async(self, m):
         if not isinstance(m, bool):
@@ -249,52 +248,49 @@ class RpcRequest(object):
     @property
     def method(self):
         return self._method
-    
+
     @method.setter
     def method(self, m):
         if not isinstance(m, str):
             raise TypeError("method value must be a string name")
         self._method = m
-    
+
     @property
     def args(self):
         return self._args
-    
+
     @args.setter
     def args(self, args):
         if not isinstance(args, (list, tuple)):
             raise TypeError("args parameter must be a list or tuple")
         self._args = args
-    
+
     @property
     def kwargs(self):
         return self._kwargs
-    
+
     @kwargs.setter
     def kwargs(self, kwargs):
         if not isinstance(kwargs, dict):
             raise TypeError("kwargs parameter must be a dict")
         self._kwargs = kwargs
-    
+
     @property
     def callback(self):
         return self._callback
-    
+
     @callback.setter
     def callback(self, cbk):
-        
-#        if cbk is None:
-#            self._callback = None
-#            return
-#        
-#        if not isinstance(cbk, str) and not hasattr(cbk, "__call__") :
-#            raise TypeError("Callback value must either be a callable, or string name of callable")
-        
+
+        #        if cbk is None:
+        #            self._callback = None
+        #            return
+        #
+        #        if not isinstance(cbk, str) and not hasattr(cbk, "__call__") :
+        #            raise TypeError("Callback value must either be a callable, or string name of callable")
+
         self._callback = cbk
 
     @property
     def id(self):
         return self._callback_id
-
-
-    
